@@ -1,0 +1,7 @@
+keyboard==0.13.5
+mss==6.1.0
+numpy==1.19.5
+pywin32==303
+setuptools==56.0.0
+win32gui==221.6
+opencv_python==4.5.3.56
