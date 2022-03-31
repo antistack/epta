@@ -20,9 +20,9 @@ class Wrapper(BaseTool):
     def use(self, *args, **kwargs):
         return self.tool
 
-    def update(self, *args, **kwargs):
-        if isinstance(self.tool, BaseTool):
-            self.tool.update(*args, **kwargs)
+    # def update(self, *args, **kwargs):
+    #     if isinstance(self.tool, BaseTool):
+    #         self.tool.update(*args, **kwargs)
 
 class Variable(Wrapper):
     # easier tool tracing
@@ -32,6 +32,9 @@ class Variable(Wrapper):
     def use(self, *args, **kwargs):
         return self.tool(*args, **kwargs)
 
+    def update(self, *args, **kwargs):
+        if isinstance(self.tool, BaseTool):
+            self.tool.update(*args, **kwargs)
 
 class Atomic(BaseTool):
     # single dependence
