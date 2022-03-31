@@ -5,25 +5,36 @@ def mapper_test():
     import epta.tools.base as eb
     import numpy as np
 
-    @dataclass
-    class PositionMapperTest(eb.PositionMapper):
-        config: field(init=True)
-        _key_mappings: tuple = tuple()
-        x: callable = lambda *args, **kwargs: 0
-        name: str = 'PositionMapperTest'
+    class ConfigTool(ec.base_ops.Variable, ec.ConfigDependent):
+        def __init__(self, *args, **kwargs):
+            super(ConfigTool, self).__init__(*args, **kwargs)
+
+        def use(self, *args, **kwargs):  # return this value
+            return self.tool.use(self.config, 30)
+
+    class ConfigTool2(ConfigTool):
+        def __init__(self, tool: 'BaseTool' = None, **kwargs):
+            super(ConfigTool2, self).__init__(tool=tool, **kwargs)
+
+        def update(self, *args, **kwargs):  # trigger update
+            self.tool = ec.base_ops.Wrapper(np.random.randint(1, 10))  # wrap value (store it)
 
     settings = ec.Settings()
     settings.path = 'test/path/123'
     config = ec.Config(settings)
 
-    mapper = eb.PositionMapper(config, name='position_mapper_test')
-    mapper.x = lambda cfg: len(cfg.settings.path) + np.random.randint(1, 10)
+    mapper = eb.PositionMapper(name='position_mapper_test',
+                               tools={'z': ConfigTool2(config=config)})
 
-    mapper_wrapper = eb.PositionMapperWrapper(mapper)
-    mapper_wrapper_2 = eb.PositionMapperWrapper(PositionMapperTest(config, name='help'))
+    mapper['x'] = ec.base_ops.Lambda(lambda cfg: len(cfg.settings.path) + np.random.randint(1, 10))
+    mapper['y'] = ConfigTool(ec.base_ops.Lambda(lambda cfg, a: len(cfg.settings.path) + np.random.randint(1, 10) + a),
+                             config=config)
+    mapper_wrapper = eb.PositionMapperWrapper(mapper, name='position_mapper_test')
+    mapper_wrapper.update(config)
+    # mapper_wrapper.use(config)
 
-    position_manager = ec.ToolDict(tools=[mapper_wrapper, mapper_wrapper_2])
-    position_manager.update()
+    position_manager = ec.ToolDict(tools=[mapper_wrapper])
+    position_manager.update(config)
     return config, position_manager
 
 
