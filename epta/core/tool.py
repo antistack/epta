@@ -21,6 +21,8 @@ class BaseTool(UpdateDependent):
 class ToolDict(BaseTool):
     def __init__(self, tools: Union[Dict[str, BaseTool], List[BaseTool]] = None, name='ToolDict', **kwargs) -> None:
         super(ToolDict, self).__init__(name=name, **kwargs)
+        if tools is None:
+            tools = dict()
         if isinstance(tools, list):
             tools = {tool.name: tool for tool in tools}
         self._tools = tools  # TODO: change to ordered dict and proper add_tool/_update
