@@ -1,6 +1,4 @@
 def mapper_test():
-    from dataclasses import dataclass, field
-
     import epta.core as ec
     import epta.tools.base as eb
     import numpy as np
@@ -23,8 +21,8 @@ def mapper_test():
     settings.path = 'test/path/123'
     config = ec.Config(settings)
 
-    mapper = eb.PositionMapper(name='position_mapper_test',
-                               tools={'z': ConfigTool2(config=config)})
+    mapper = ec.ToolDict(name='position_mapper_test',
+                         tools={'z': ConfigTool2(config=config)})
 
     mapper['x'] = ec.base_ops.Lambda(lambda cfg: len(cfg.settings.path) + np.random.randint(1, 10))
     mapper['y'] = ConfigTool(ec.base_ops.Lambda(lambda cfg, a: len(cfg.settings.path) + np.random.randint(1, 10) + a),
