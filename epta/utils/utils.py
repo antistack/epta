@@ -2,7 +2,8 @@ import cv2 as cv
 import os
 from typing import Union
 
-def _save_crops(crops: Union[dict, 'np.ndarray'], save_path: str, prefix=''):
+
+def _save_crops(crops: Union[dict, 'np.ndarray'], save_path: str, prefix: str = ''):
     # single leveled dictionary
     if isinstance(crops, dict):
         for name, crop in crops.items():
@@ -11,9 +12,13 @@ def _save_crops(crops: Union[dict, 'np.ndarray'], save_path: str, prefix=''):
         if crops is not None:
             if prefix.startswith('_'):
                 prefix = prefix[1:]
-            save_name = os.path.join(save_path, f'{prefix}.png')
+            if prefix:
+                save_name = os.path.join(save_path, f'{prefix}.png')
+            else:
+                save_name = save_path
             crop = cv.cvtColor(crops, cv.COLOR_RGB2BGR)
             cv.imwrite(save_name, crop)
+
 
 def save_crops(crops: dict, save_path: str):
     # 2 leveled dictionary
