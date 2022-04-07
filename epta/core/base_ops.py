@@ -1,4 +1,4 @@
-from typing import Any, List, Union, Tuple, Iterable
+from typing import Any, List, Union, Tuple, Iterable, Mapping
 
 from epta.core import BaseTool
 
@@ -12,7 +12,7 @@ class Lambda(BaseTool):
         return self._fnc(*args, **kwargs)
 
 
-class Wrapper(BaseTool):
+class Wrapper(BaseTool):  # TODO: make partial-like?
     def __init__(self, tool: Any, name: str = 'Wrapper', **kwargs):
         super(Wrapper, self).__init__(name=name, **kwargs)
         self.tool = tool
@@ -42,9 +42,23 @@ class Atomic(BaseTool):
         super(Atomic, self).__init__(name=name, **kwargs)
         self.key = key
 
-    def use(self, data: dict, **kwargs) -> Any:
+    def use(self, data: Mapping, **kwargs) -> Any:
         return data[self.key]
 
+class SoftAtomic(Atomic):
+    # converts dict to flat value
+    def __init__(self, name='SoftAtomic', default_value=None, **kwargs):
+        super(SoftAtomic, self).__init__(name=name, **kwargs)
+        self._default_value = default_value
+        if callable(default_value):
+            self._default_value_getter = lambda: default_value()
+        else:
+            self._default_value_getter = lambda: default_value
+
+    def use(self, data: dict, default_value=None, **kwargs):
+        default_value = default_value or self._default_value_getter()
+        inp = data.get(self.key, default_value)
+        return inp
 
 class Sequential(BaseTool):
     def __init__(self, tools: List['BaseTool'] = None, name: str = 'Sequential', **kwargs):
@@ -194,6 +208,35 @@ class DataSpread(BaseTool):
     def use(self, *args, **kwargs) -> dict:
         return self.spread_data(*args)
 
+class DataMergeDict(BaseTool):
+    # merge dicts: {**a, **b}
+    def __init__(self, name='DataMergeDict', **kwargs):
+        super(DataMergeDict, self).__init__(name=name, **kwargs)
+
+    @staticmethod
+    def merge_data(args: tuple, **kwargs):
+        result = dict()
+        for arg in args:
+            result.update(arg)
+        return result
+
+    def use(self, *args, **kwargs) -> dict:
+        return self.merge_data(*args)
+
+class DataMergeList(BaseTool):
+    # merge lists: [*a, *b]
+    def __init__(self, name='DataMergeList', **kwargs):
+        super(DataMergeList, self).__init__(name=name, **kwargs)
+
+    @staticmethod
+    def merge_data(args: tuple, **kwargs):
+        result = list()
+        for arg in args:
+            result.append(arg)
+        return result
+
+    def use(self, *args, **kwargs) -> list:
+        return self.merge_data(*args)
 
 class InputUnpack(BaseTool):
     # use tool(*inp)
