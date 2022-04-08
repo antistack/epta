@@ -1,4 +1,5 @@
 from typing import Any, List, Union, Tuple, Iterable, Mapping
+import math
 
 from epta.core import BaseTool
 
@@ -24,6 +25,7 @@ class Wrapper(BaseTool):  # TODO: make partial-like?
     #     if isinstance(self.tool, BaseTool):
     #         self.tool.update(*args, **kwargs)
 
+
 class Variable(Wrapper):
     # easier tool tracing
     def __init__(self, tool: 'BaseTool', name: str = 'Variable', **kwargs):
@@ -36,6 +38,7 @@ class Variable(Wrapper):
         if isinstance(self.tool, BaseTool):
             self.tool.update(*args, **kwargs)
 
+
 class Atomic(BaseTool):
     # single dependence
     def __init__(self, key: Union[slice, int, str, Tuple], name: str = 'Atomic', **kwargs):
@@ -45,10 +48,11 @@ class Atomic(BaseTool):
     def use(self, data: Mapping, **kwargs) -> Any:
         return data[self.key]
 
+
 class SoftAtomic(Atomic):
     # converts dict to flat value
-    def __init__(self, name='SoftAtomic', default_value=None, **kwargs):
-        super(SoftAtomic, self).__init__(name=name, **kwargs)
+    def __init__(self, *args, name: str = 'SoftAtomic', default_value: Any = None, **kwargs):
+        super(SoftAtomic, self).__init__(*args, name=name, **kwargs)
         self._default_value = default_value
         if callable(default_value):
             self._default_value_getter = lambda: default_value()
@@ -60,7 +64,9 @@ class SoftAtomic(Atomic):
         inp = data.get(self.key, default_value)
         return inp
 
+
 class Sequential(BaseTool):
+    # Do not use sequential with kwargs, as it does not pass them to the tools.
     def __init__(self, tools: List['BaseTool'] = None, name: str = 'Sequential', **kwargs):
         super(Sequential, self).__init__(name=name, **kwargs)
         if tools is None:
@@ -76,6 +82,34 @@ class Sequential(BaseTool):
     def update(self, *args, **kwargs):
         for tool in self.tools:
             tool.update(*args, **kwargs)
+
+    def append(self, tool: 'BaseTool'):
+        if isinstance(tool, BaseTool):
+            self.tools.append(tool)
+
+
+class Product(Sequential):
+    def __init__(self, tools: List['BaseTool'] = None, name: str = 'Product', **kwargs):
+        super(Product, self).__init__(name=name, tools=tools, **kwargs)
+
+    def use(self, *args, **kwargs):
+        result = list()
+        for tool in self.tools:
+            local_res = tool(*args, **kwargs)
+            result.append(local_res)
+        return math.prod(result)
+
+
+class Sum(Sequential):
+    def __init__(self, tools: List['BaseTool'] = None, name: str = 'Sum', **kwargs):
+        super(Sum, self).__init__(name=name, tools=tools, **kwargs)
+
+    def use(self, *args, **kwargs):
+        result = list()
+        for tool in self.tools:
+            local_res = tool(*args, **kwargs)
+            result.append(local_res)
+        return sum(result)
 
 
 class Compose(BaseTool):
@@ -144,6 +178,9 @@ class Parallel(Wrapper):
 
 
 class Concatenate(Sequential):
+    def __init__(self, tools: List['BaseTool'] = None, name: str = 'Concatenate', **kwargs):
+        super(Concatenate, self).__init__(name=name, tools=tools, **kwargs)
+
     def use(self, *args, **kwargs):
         result = list()
         for tool in self.tools:
@@ -208,6 +245,7 @@ class DataSpread(BaseTool):
     def use(self, *args, **kwargs) -> dict:
         return self.spread_data(*args)
 
+
 class DataMergeDict(BaseTool):
     # merge dicts: {**a, **b}
     def __init__(self, name='DataMergeDict', **kwargs):
@@ -223,6 +261,7 @@ class DataMergeDict(BaseTool):
     def use(self, *args, **kwargs) -> dict:
         return self.merge_data(*args)
 
+
 class DataMergeList(BaseTool):
     # merge lists: [*a, *b]
     def __init__(self, name='DataMergeList', **kwargs):
@@ -237,6 +276,7 @@ class DataMergeList(BaseTool):
 
     def use(self, *args, **kwargs) -> list:
         return self.merge_data(*args)
+
 
 class InputUnpack(BaseTool):
     # use tool(*inp)
