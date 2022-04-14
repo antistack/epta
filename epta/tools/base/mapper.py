@@ -12,5 +12,4 @@ class PositionMapperWrapper(ToolWrapper):
         # trigger tools update AND tools.use,
         # Because next, this will be used in 'global' position manager.
         self.tool.update(*args, **kwargs)
-        self.update_key_mappings()
         self.use(*args, **kwargs)
