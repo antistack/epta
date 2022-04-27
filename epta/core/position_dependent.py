@@ -1,11 +1,10 @@
-import abc
 from typing import Tuple, Union
 
 from .base_ops import Atomic
 from epta.core import ToolDict
 
 
-class PositionDependent(Atomic, abc.ABC):
+class PositionDependent(Atomic):
     def __init__(self, position_manager: 'ToolDict', name: str = 'PositionDependent', **kwargs):
         super(PositionDependent, self).__init__(name=name, **kwargs)
         self.position_manager = position_manager

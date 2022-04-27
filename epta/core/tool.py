@@ -1,17 +1,19 @@
 from typing import Any, Dict, Iterator, ItemsView, Iterable, Union, List
 
-from .config import UpdateDependent
+from .meta import UpdateDependent
 
 class BaseTool(UpdateDependent):
     def __init__(self, name: str = 'BaseTool', **kwargs):
         super().__init__(**kwargs)
         self.name = name
-        # TODO: add _tools for common update method.
 
     def get(self, key: str, default_value=None):
         return getattr(self, key, default_value)
 
     def use(self, *args, **kwargs) -> Any:
+        pass
+
+    def update(self, *args, **kwargs):
         pass
 
     def __call__(self, *args, **kwargs):
@@ -25,7 +27,7 @@ class ToolDict(BaseTool):
             tools = dict()
         if isinstance(tools, list):
             tools = {tool.name: tool for tool in tools}
-        self._tools = tools  # TODO: change to ordered dict and proper add_tool/_update
+        self._tools = tools
 
     def __getitem__(self, key: str) -> BaseTool:
         return self._tools[key]
@@ -71,3 +73,9 @@ class ToolDict(BaseTool):
     def update(self, *args, **kwargs):
         for tool in self._tools.values():
             tool.update(*args, **kwargs)
+
+    def use(self, *args, **kwargs) -> dict:
+        data = dict()
+        for tool in self._tools.values():
+            data[tool.name] = tool(*args, **kwargs)
+        return data

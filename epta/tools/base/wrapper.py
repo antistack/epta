@@ -7,8 +7,8 @@ class ToolWrapper(ToolDict):
     """
 
     def __init__(self, tool: 'ToolDict', name: str = None, **kwargs):
-        super(ToolWrapper, self).__init__(name=(name or tool.name), **kwargs)
         self.tool = tool
+        super(ToolWrapper, self).__init__(name=(name or tool.name), **kwargs)
 
     def use(self, *args, **kwargs):  # update cached values
         for key in self.tool:

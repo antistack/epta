@@ -1,12 +1,16 @@
-import abc
 from typing import Union
+
 from .settings import Settings
 
-
-class Config(abc.ABC):
+class Config:
     def __init__(self, settings: Union[Settings, dict] = None, **kwargs):
+        if settings is None:
+            settings = dict()
+        if isinstance(settings, dict):
+            self.settings = Settings.from_dict(settings)
+        else:
+            self.settings = settings
         super().__init__(**kwargs)
-        self.settings = settings or Settings()
 
     def from_dict(self, data: dict):
         for key, val in data.items():
@@ -14,18 +18,3 @@ class Config(abc.ABC):
 
     def get(self, key: str, default_value=None):
         return getattr(self, key, default_value)
-
-
-class UpdateDependent(abc.ABC):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    # update on config change for example
-    def update(self, *args, **kwargs):
-        pass
-
-
-class ConfigDependent(abc.ABC):
-    def __init__(self, config: Config, **kwargs):
-        super().__init__(**kwargs)
-        self.config = config

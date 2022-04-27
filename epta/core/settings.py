@@ -1,7 +1,10 @@
-import abc
+class Settings:
+    @classmethod
+    def from_dict(cls, data: dict):
+        obj = cls()
+        obj.update(data)
+        return obj
 
-
-class Settings(abc.ABC):
     def update(self, data: dict):
         for key, value in data.items():
             setattr(self, key, value)
