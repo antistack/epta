@@ -1,5 +1,4 @@
-from .wrapper import ToolWrapper
-from .mapper import PositionMapperWrapper
+from .wrapper import ToolWrapper, PositionMapperWrapper
 from .cropper import Cropper
 from . position_cropper import PositionCropper
 
