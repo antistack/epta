@@ -5,6 +5,9 @@ from epta.core import BaseTool
 
 
 class BaseRecogniser(BaseTool):
+    """
+    Tool to inherit from for more complex recognition tools.
+    """
     def __init__(self, name: str = 'base_recogniser', **kwargs):
         super(BaseRecogniser, self).__init__(name=name, **kwargs)
 

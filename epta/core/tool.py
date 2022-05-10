@@ -3,12 +3,15 @@ from typing import Any, Dict, Iterator, ItemsView, Iterable, Union, List
 from .meta import UpdateDependent
 
 class BaseTool(UpdateDependent):
+    """
+    Base class for tool instance.
+
+    Args:
+        name (str): Tool name.
+    """
     def __init__(self, name: str = 'BaseTool', **kwargs):
         super().__init__(**kwargs)
         self.name = name
-
-    def get(self, key: str, default_value=None):
-        return getattr(self, key, default_value)
 
     def use(self, *args, **kwargs) -> Any:
         pass
@@ -21,6 +24,13 @@ class BaseTool(UpdateDependent):
 
 
 class ToolDict(BaseTool):
+    """
+    Holds tools in a dictionary.
+
+    Args:
+        tools (dict, list): dictionary mapping of names to tools or a list.
+            If list is passed - keys are tool.name.
+    """
     def __init__(self, tools: Union[Dict[str, BaseTool], List[BaseTool]] = None, name='ToolDict', **kwargs) -> None:
         super(ToolDict, self).__init__(name=name, **kwargs)
         if tools is None:

@@ -5,6 +5,15 @@ from epta.core import ToolDict
 
 
 class PositionDependent(Atomic):
+    """
+    A class that requires :attr:`position_manager`.
+    By default takes ``(x, y)`` point at :attr:`key` and updating ``inner_position`` to ``(x0, y0, x1, y1)``.
+    Usually used to inherit from as not to pass coordinates as ``args`` to tools.
+
+    Args:
+        position_manager (:class:`~epta.core.tool.ToolDict`): a mapping tool dictionary.
+        key (str): key to lookup in :attr:`position_manager`.
+    """
     def __init__(self, position_manager: 'ToolDict', name: str = 'PositionDependent', **kwargs):
         super(PositionDependent, self).__init__(name=name, **kwargs)
         self.position_manager = position_manager

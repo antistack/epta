@@ -3,7 +3,10 @@ from epta.core import ToolDict
 
 class ToolWrapper(ToolDict):
     """
-    Wrapper to store tool values
+    Stores :attr:`tool` values after use.
+
+    Args:
+        tool (ToolDict): Tool to store values from.
     """
 
     def __init__(self, tool: 'ToolDict', name: str = None, **kwargs):
@@ -20,7 +23,8 @@ class ToolWrapper(ToolDict):
 
 class PositionMapperWrapper(ToolWrapper):
     """
-    Wrapper for mappers to update positions if config was updated
+    Triggers ``use`` on ``update``.
+    Used to wrap mappers. (for example, if config was updated)
     """
 
     def __init__(self, *args, **kwargs):
