@@ -152,6 +152,7 @@ class Compose(BaseTool):
 
     Args:
         fnc (BaseTool, callable): Tool or function to use.
+
     Keyword Args:
          func_args (tuple): Tuple of inputs passed to the :attr:`fnc`. Tools to be called on use.
          func_kwargs (dict): Dict of kwargs to the :attr:`fnc`. Tools to be called on use.
@@ -210,14 +211,13 @@ class Compose(BaseTool):
 
 class Parallel(Variable):
     """
-    Apply singe tool in parallel for the given inputs.
+    Apply singe tool for the given inputs.
 
     Args:
         tool (BaseTool): Tool to use.
     Returns:
         result (list): [:attr:`tool`(inputs), ...]
     """
-    # single tool for multiple inputs -> multiple outputs
     def __init__(self, tool: 'BaseTool', name: str = 'Parallel', **kwargs):
         super(Parallel, self).__init__(tool=tool, name=name, **kwargs)
 
@@ -234,6 +234,7 @@ class Concatenate(Sequential):
 
     Keyword Args:
         tools (list): Tools to use.
+
     Returns:
         result (list): Multiple tools result.
     """
@@ -279,7 +280,6 @@ class DataReduce(BaseTool):
     Keyword Args:
         keys: keys to select on use.
     """
-    # dict to tuple
     def __init__(self, keys: Union[List[Union[tuple, str]], Union[tuple, str]] = None, name='DataReduce', **kwargs):
         super(DataReduce, self).__init__(name=name, **kwargs)
         if keys is None:
@@ -323,7 +323,6 @@ class DataMergeDict(BaseTool):
     """
     Merge multiple dictionaries. {**a, **b, ...}.
     """
-    # merge dicts: {**a, **b}
     def __init__(self, name='DataMergeDict', **kwargs):
         super(DataMergeDict, self).__init__(name=name, **kwargs)
 
