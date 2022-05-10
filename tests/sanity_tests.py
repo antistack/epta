@@ -8,7 +8,7 @@ def mapper_test():
             super(ConfigTool, self).__init__(*args, **kwargs)
 
         def use(self, *args, **kwargs):  # return this value
-            return self.tool.use(self.config, 30)
+            return self.tool(self.config, 30)
 
     class ConfigTool2(ConfigTool):
         def __init__(self, tool: 'BaseTool' = None, **kwargs):

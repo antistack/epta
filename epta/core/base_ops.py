@@ -224,7 +224,7 @@ class Parallel(Variable):
     def use(self, data: Iterable, **kwargs):
         result = list()
         for d in data:
-            result.append(self.tool.use(d, **kwargs))
+            result.append(self.tool(d, **kwargs))
         return result
 
 

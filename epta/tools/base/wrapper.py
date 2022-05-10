@@ -16,7 +16,7 @@ class ToolWrapper(ToolDict):
     def use(self, *args, **kwargs):  # update cached values
         for key in self.tool:
             value = self.tool[key]
-            self[key] = value.use(*args, **kwargs)
+            self[key] = value(*args, **kwargs)
 
     def update(self, *args, **kwargs):
         self.tool.update(*args, **kwargs)
