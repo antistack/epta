@@ -82,7 +82,8 @@ class ToolDict(BaseTool):
 
     def update(self, *args, **kwargs):
         for tool in self._tools.values():
-            tool.update(*args, **kwargs)
+            if isinstance(tool, BaseTool):
+                tool.update(*args, **kwargs)
 
     def use(self, *args, **kwargs) -> dict:
         data = dict()
