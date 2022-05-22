@@ -11,8 +11,6 @@ class MssScreenHooker(BaseImageHooker, PositionDependent):
     def __init__(self, name: str = 'mss_hooker', **kwargs):
         super(MssScreenHooker, self).__init__(name=name, **kwargs)
 
-        self.mss = mss.mss()
-
     def update(self, *args, **kwargs):
         x, y, x_end, y_end = self.make_single_position()
         w = x_end - x
@@ -20,7 +18,8 @@ class MssScreenHooker(BaseImageHooker, PositionDependent):
         self.inner_position = {"top": y, "left": x, "width": w, "height": h}
 
     def hook_image(self, *args, **kwargs) -> 'np.ndarray':
-        data = self.mss.grab(self.inner_position)
-        img_array = np.array(data)[..., :3]
-        img_array = cv.cvtColor(img_array, cv.COLOR_BGR2RGB)
+        with mss.mss() as sct:
+            data = sct.grab(self.inner_position)
+            img_array = np.array(data)[..., :3]
+            img_array = cv.cvtColor(img_array, cv.COLOR_BGR2RGB)
         return img_array
