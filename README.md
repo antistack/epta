@@ -7,8 +7,15 @@
 
 #### Demo projects
 - [Valorant helper](https://github.com/codepause/vahper)
+- [LODCA](https://github.com/codepause/lodca)
 
-
+#### Installation
+```
+git clone https://github.com/antistack/epta
+cd epta
+pip install -r requirements.txt
+python setup.py develop
+```
 ##### TODO
 - Documentation
 - More tools
