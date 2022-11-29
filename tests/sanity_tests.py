@@ -90,6 +90,8 @@ def cropper_test():
     )
 
     pipeline = eco.Sequential([
+        eco.Lambda(lambda x, **kwargs: print(kwargs)),
+        eco.Lambda(lambda x: print(x)),
         pipeline,
         eco.DataSpread(['image_0', 'image_1']),
         eco.Concatenate([cropper_0, cropper_1]),
@@ -97,7 +99,7 @@ def cropper_test():
     ])
     pipeline.update()
 
-    data_2 = pipeline.use()
+    data_2 = pipeline.use(alpha=10)
     assert data_2['cropped_0'].shape[1] < 300
 
     return None

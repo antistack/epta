@@ -1,5 +1,6 @@
 import win32gui
 
+
 def enum_window_titles():
     def callback(handle, data):
         titles.append(win32gui.GetWindowText(handle))

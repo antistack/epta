@@ -1,5 +1,6 @@
 from typing import Any, List, Union, Tuple, Iterable, Mapping
 import math
+import inspect
 
 from epta.core import BaseTool
 
@@ -11,12 +12,15 @@ class Lambda(BaseTool):
     Args:
         fnc (callable, ): object to be called with passed ``*args`` and ``**kwargs``.
     """
+
     def __init__(self, fnc: callable, name: str = 'Lambda', **kwargs):
         super(Lambda, self).__init__(name=name, **kwargs)
         self._fnc = fnc
+        arg_spec = inspect.getfullargspec(self._fnc)
+        self._allow_kwargs = arg_spec.varkw
 
     def use(self, *args, **kwargs) -> Any:
-        return self._fnc(*args, **kwargs)
+        return self._fnc(*args, **kwargs) if self._allow_kwargs else self._fnc(*args)
 
 
 class Wrapper(BaseTool):  # TODO: make partial-like?
@@ -24,6 +28,7 @@ class Wrapper(BaseTool):  # TODO: make partial-like?
     Wrapper to pass tools as ``args`` or ``kwargs`` in :class:`~epta.core.base_ops.Compose`.
     ``.update`` method will not be invoked on the wrapped tool.
     """
+
     def __init__(self, tool: Any, name: str = 'Wrapper', **kwargs):
         super(Wrapper, self).__init__(name=name, **kwargs)
         self.tool = tool
@@ -36,15 +41,17 @@ class Wrapper(BaseTool):  # TODO: make partial-like?
     #         self.tool.update(*args, **kwargs)
 
 
-class Variable(Wrapper):
+class Variable(BaseTool):
     """
-    May be used in future to trace tools graph.
+    Track tool as Variable.
 
     Args:
         tool (BaseTool): tool to store.
     """
+
     def __init__(self, tool: 'BaseTool', name: str = 'Variable', **kwargs):
-        super(Variable, self).__init__(name=name, tool=tool, **kwargs)
+        super(Variable, self).__init__(name=name, **kwargs)
+        self.tool = tool
 
     def use(self, *args, **kwargs):
         return self.tool(*args, **kwargs)
@@ -61,6 +68,7 @@ class Atomic(BaseTool):
     Args:
         key (slice, int, str, tuple): key to get.
     """
+
     def __init__(self, key: Union[slice, int, str, Tuple], name: str = 'Atomic', **kwargs):
         super(Atomic, self).__init__(name=name, **kwargs)
         self.key = key
@@ -77,6 +85,7 @@ class SoftAtomic(Atomic):
         default_value (Any): `callable` constructor to call or static value to return on every use if :attr:`key`
             was not found in input `data`.
     """
+
     def __init__(self, *args, name: str = 'SoftAtomic', default_value: Any = None, **kwargs):
         super(SoftAtomic, self).__init__(*args, name=name, **kwargs)
         self._default_value = default_value
@@ -98,6 +107,7 @@ class Sequential(BaseTool):
     Keyword Args:
         tools (list): List of tools to use sequentially.
     """
+
     def __init__(self, tools: List['BaseTool'] = None, name: str = 'Sequential', **kwargs):
         super(Sequential, self).__init__(name=name, **kwargs)
         if tools is None:
@@ -106,9 +116,9 @@ class Sequential(BaseTool):
         self.tools = tools
 
     def use(self, inp: Any = None, **kwargs) -> Any:
-        # kwargs are not passed to the tools
+        # kwargs are passed via tool name or are common for all tools.
         for tool in self.tools:
-            inp = tool(inp)
+            inp = tool(inp, **kwargs.get(tool.name, kwargs))
         return inp
 
     def update(self, *args, **kwargs):
@@ -147,7 +157,7 @@ class Sum(Sequential):
 class Compose(BaseTool):
     """
     Custom function application with given ``args`` and ``kwargs`` that can be tools or values.
-    If some of the arguments are tools - they are also called before passing to the :attr:`fnc` with a given inputs.
+    If some arguments are tools - they are also called before passing to the :attr:`fnc` with a given inputs.
     Tools are stored inside on the constructor call. To proper ``update`` handling use unique tool names.
 
     Args:
@@ -157,6 +167,7 @@ class Compose(BaseTool):
          func_args (tuple): Tuple of inputs passed to the :attr:`fnc`. Tools to be called on use.
          func_kwargs (dict): Dict of kwargs to the :attr:`fnc`. Tools to be called on use.
     """
+
     # lambda with tools' tracing
     def __init__(self, fnc: Union['BaseTool', callable], func_args: Tuple[Any, ...] = None,
                  func_kwargs: dict = None, name='Compose', **kwargs):
@@ -218,6 +229,7 @@ class Parallel(Variable):
     Returns:
         result (list): [:attr:`tool`(inputs), ...]
     """
+
     def __init__(self, tool: 'BaseTool', name: str = 'Parallel', **kwargs):
         super(Parallel, self).__init__(tool=tool, name=name, **kwargs)
 
@@ -238,6 +250,7 @@ class Concatenate(Sequential):
     Returns:
         result (list): Multiple tools result.
     """
+
     def __init__(self, tools: List['BaseTool'] = None, name: str = 'Concatenate', **kwargs):
         super(Concatenate, self).__init__(name=name, tools=tools, **kwargs)
 
@@ -256,6 +269,7 @@ class DataGather(BaseTool):
     Keyword Args:
         keys: keys to select on use.
     """
+
     def __init__(self, keys: Union[List[Union[tuple, str]], Union[tuple, str]] = None, name='DataGatherer', **kwargs):
         super(DataGather, self).__init__(name=name, **kwargs)
         if keys is None:
@@ -280,6 +294,7 @@ class DataReduce(BaseTool):
     Keyword Args:
         keys: keys to select on use.
     """
+
     def __init__(self, keys: Union[List[Union[tuple, str]], Union[tuple, str]] = None, name='DataReduce', **kwargs):
         super(DataReduce, self).__init__(name=name, **kwargs)
         if keys is None:
@@ -303,6 +318,7 @@ class DataSpread(BaseTool):
     Keyword Args:
         keys: keys to attach on use.
     """
+
     def __init__(self, keys: Union[List[Union[tuple, str]], Union[tuple, str]] = None, name='DataSpreader', **kwargs):
         super(DataSpread, self).__init__(name=name, **kwargs)
         if keys is None:
@@ -323,6 +339,7 @@ class DataMergeDict(BaseTool):
     """
     Merge multiple dictionaries. {**a, **b, ...}.
     """
+
     def __init__(self, name='DataMergeDict', **kwargs):
         super(DataMergeDict, self).__init__(name=name, **kwargs)
 
@@ -341,6 +358,7 @@ class DataMergeList(BaseTool):
     """
     Merge multiple lists. [**a, **b, ...].
     """
+
     def __init__(self, name='DataMergeList', **kwargs):
         super(DataMergeList, self).__init__(name=name, **kwargs)
 
@@ -362,6 +380,7 @@ class InputUnpack(Variable):
     Args:
         tool (BaseTool): tool to use.
     """
+
     def __init__(self, tool: 'BaseTool', name: str = 'DataUnpack', **kwargs):
         super(InputUnpack, self).__init__(tool=tool, name=name, **kwargs)
 
