@@ -1,11 +1,11 @@
 import abc
 
-from epta.core import BaseTool
+from epta.core import Tool
 
 
-class BaseImageHooker(BaseTool, abc.ABC):
-    def __init__(self, name: str = 'image_hooker', **kwargs):
-        super(BaseImageHooker, self).__init__(name=name, **kwargs)
+class ImageHooker(Tool, abc.ABC):
+    def __init__(self, name: str = 'Image_hooker', **kwargs):
+        super(ImageHooker, self).__init__(name=name, **kwargs)
 
     def use(self, *args, **kwargs) -> dict:
         return self.hook_image(*args, **kwargs)

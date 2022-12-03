@@ -2,6 +2,7 @@ from typing import Union
 
 from .settings import Settings
 
+
 class Config:
     def __init__(self, settings: Union[Settings, dict] = None, **kwargs):
         if settings is None:

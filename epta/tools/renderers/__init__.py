@@ -1,3 +1,2 @@
-from .base_renderer import BaseRenderer
+from .renderer import Renderer
 from .simple_renderer import SimpleRenderer
-

@@ -7,20 +7,21 @@ from epta.core import ToolDict
 class PositionDependent(Atomic):
     """
     A class that requires :attr:`position_manager`.
-    By default takes ``(x, y)`` point at :attr:`key` and updating ``inner_position`` to ``(x0, y0, x1, y1)``.
+    By default, takes ``(x, y)`` point at :attr:`key` and updating ``inner_position`` to ``(x0, y0, x1, y1)``.
     Usually used to inherit from as not to pass coordinates as ``args`` to tools.
 
     Args:
         position_manager (:class:`~epta.core.tool.ToolDict`): a mapping tool dictionary.
         key (str): key to lookup in :attr:`position_manager`.
     """
+
     def __init__(self, position_manager: 'ToolDict', name: str = 'PositionDependent', **kwargs):
         super(PositionDependent, self).__init__(name=name, **kwargs)
         self.position_manager = position_manager
 
         self.inner_position = None
 
-    def make_single_position(self, key: str = None, *args, **kwargs) -> Tuple[int, int, int, int]:
+    def make_single_position(self, key: str = None, *_, **__) -> Tuple[int, int, int, int]:
         # rewrite this if you want to get multiple positions for crops.
         if key is None:
             key = self.key

@@ -2,10 +2,10 @@ from typing import Any, List, Union, Tuple, Iterable, Mapping
 import math
 import inspect
 
-from epta.core import BaseTool
+from epta.core import Tool
 
 
-class Lambda(BaseTool):
+class Lambda(Tool):
     """
     Lambda tool.
 
@@ -23,7 +23,7 @@ class Lambda(BaseTool):
         return self._fnc(*args, **kwargs) if self._allow_kwargs else self._fnc(*args)
 
 
-class Wrapper(BaseTool):  # TODO: make partial-like?
+class Wrapper(Tool):
     """
     Wrapper to pass tools as ``args`` or ``kwargs`` in :class:`~epta.core.base_ops.Compose`.
     ``.update`` method will not be invoked on the wrapped tool.
@@ -36,20 +36,16 @@ class Wrapper(BaseTool):  # TODO: make partial-like?
     def use(self, *args, **kwargs):
         return self.tool
 
-    # def update(self, *args, **kwargs):
-    #     if isinstance(self.tool, BaseTool):
-    #         self.tool.update(*args, **kwargs)
 
-
-class Variable(BaseTool):
+class Variable(Tool):
     """
     Track tool as Variable.
 
     Args:
-        tool (BaseTool): tool to store.
+        tool (Tool): tool to store.
     """
 
-    def __init__(self, tool: 'BaseTool', name: str = 'Variable', **kwargs):
+    def __init__(self, tool: 'Tool', name: str = 'Variable', **kwargs):
         super(Variable, self).__init__(name=name, **kwargs)
         self.tool = tool
 
@@ -57,11 +53,11 @@ class Variable(BaseTool):
         return self.tool(*args, **kwargs)
 
     def update(self, *args, **kwargs):
-        if isinstance(self.tool, BaseTool):
+        if isinstance(self.tool, Tool):
             self.tool.update(*args, **kwargs)
 
 
-class Atomic(BaseTool):
+class Atomic(Tool):
     """
     Get value from the inputs by :attr:`key`.
 
@@ -100,15 +96,15 @@ class SoftAtomic(Atomic):
         return inp
 
 
-class Sequential(BaseTool):
+class Sequential(Tool):
     """
-    Sequential modules application. Handles ``update`` method.
+    Sequential module application. Handles ``update`` method.
 
     Keyword Args:
         tools (list): List of tools to use sequentially.
     """
 
-    def __init__(self, tools: List['BaseTool'] = None, name: str = 'Sequential', **kwargs):
+    def __init__(self, tools: List['Tool'] = None, name: str = 'Sequential', **kwargs):
         super(Sequential, self).__init__(name=name, **kwargs)
         if tools is None:
             tools = list()
@@ -125,13 +121,13 @@ class Sequential(BaseTool):
         for tool in self.tools:
             tool.update(*args, **kwargs)
 
-    def append(self, tool: 'BaseTool'):
-        if isinstance(tool, BaseTool):
+    def append(self, tool: 'Tool'):
+        if isinstance(tool, Tool):
             self.tools.append(tool)
 
 
 class Product(Sequential):
-    def __init__(self, tools: List['BaseTool'] = None, name: str = 'Product', **kwargs):
+    def __init__(self, tools: List['Tool'] = None, name: str = 'Product', **kwargs):
         super(Product, self).__init__(name=name, tools=tools, **kwargs)
 
     def use(self, *args, **kwargs):
@@ -143,7 +139,7 @@ class Product(Sequential):
 
 
 class Sum(Sequential):
-    def __init__(self, tools: List['BaseTool'] = None, name: str = 'Sum', **kwargs):
+    def __init__(self, tools: List['Tool'] = None, name: str = 'Sum', **kwargs):
         super(Sum, self).__init__(name=name, tools=tools, **kwargs)
 
     def use(self, *args, **kwargs):
@@ -154,14 +150,14 @@ class Sum(Sequential):
         return sum(result)
 
 
-class Compose(BaseTool):
+class Compose(Tool):
     """
     Custom function application with given ``args`` and ``kwargs`` that can be tools or values.
     If some arguments are tools - they are also called before passing to the :attr:`fnc` with a given inputs.
     Tools are stored inside on the constructor call. To proper ``update`` handling use unique tool names.
 
     Args:
-        fnc (BaseTool, callable): Tool or function to use.
+        fnc (Tool, callable): Tool or function to use.
 
     Keyword Args:
          func_args (tuple): Tuple of inputs passed to the :attr:`fnc`. Tools to be called on use.
@@ -169,7 +165,7 @@ class Compose(BaseTool):
     """
 
     # lambda with tools' tracing
-    def __init__(self, fnc: Union['BaseTool', callable], func_args: Tuple[Any, ...] = None,
+    def __init__(self, fnc: Union['Tool', callable], func_args: Tuple[Any, ...] = None,
                  func_kwargs: dict = None, name='Compose', **kwargs):
         super(Compose, self).__init__(name=name, **kwargs)
         self._fnc = fnc
@@ -183,26 +179,26 @@ class Compose(BaseTool):
         self.func_kwargs = func_kwargs
 
         self._tools = list()
-        if isinstance(fnc, BaseTool):
+        if isinstance(fnc, Tool):
             self._tools.append(fnc)
 
         for arg in self.func_args:
-            if isinstance(arg, BaseTool):
+            if isinstance(arg, Tool):
                 self._tools.append(arg)
 
         for kwarg in self.func_kwargs.values():
-            if isinstance(kwarg, BaseTool):
+            if isinstance(kwarg, Tool):
                 self._tools.append(kwarg)
 
     def _use_args(self, *args, **kwargs) -> tuple:
-        func_args = tuple(arg(*args, **kwargs) if isinstance(arg, BaseTool) else arg for arg in
+        func_args = tuple(arg(*args, **kwargs) if isinstance(arg, Tool) else arg for arg in
                           self.func_args)
         return func_args
 
     def _use_kwargs(self, *args, **kwargs) -> dict:
         func_kwargs = {}
         for key, value in self.func_kwargs.items():
-            if isinstance(value, BaseTool):
+            if isinstance(value, Tool):
                 new_value = value(*args, **kwargs)
             else:
                 new_value = value
@@ -225,12 +221,12 @@ class Parallel(Variable):
     Apply singe tool for the given inputs.
 
     Args:
-        tool (BaseTool): Tool to use.
+        tool (Tool): Tool to use.
     Returns:
         result (list): [:attr:`tool`(inputs), ...]
     """
 
-    def __init__(self, tool: 'BaseTool', name: str = 'Parallel', **kwargs):
+    def __init__(self, tool: 'Tool', name: str = 'Parallel', **kwargs):
         super(Parallel, self).__init__(tool=tool, name=name, **kwargs)
 
     def use(self, data: Iterable, **kwargs):
@@ -251,7 +247,7 @@ class Concatenate(Sequential):
         result (list): Multiple tools result.
     """
 
-    def __init__(self, tools: List['BaseTool'] = None, name: str = 'Concatenate', **kwargs):
+    def __init__(self, tools: List['Tool'] = None, name: str = 'Concatenate', **kwargs):
         super(Concatenate, self).__init__(name=name, tools=tools, **kwargs)
 
     def use(self, *args, **kwargs):
@@ -261,7 +257,7 @@ class Concatenate(Sequential):
         return result
 
 
-class DataGather(BaseTool):
+class DataGather(Tool):
     """
     Select :attr:`keys` from the input data. dict -> dict.
     Results may be ``None`` if key is not present.
@@ -286,7 +282,7 @@ class DataGather(BaseTool):
         return self._gather_data(data, **kwargs)
 
 
-class DataReduce(BaseTool):
+class DataReduce(Tool):
     """
     Select :attr:`keys` from the input data. dict -> tuple.
     Results may be ``None`` if key is not present.
@@ -311,7 +307,7 @@ class DataReduce(BaseTool):
         return self._reduce_data(data, **kwargs)
 
 
-class DataSpread(BaseTool):
+class DataSpread(Tool):
     """
     Attach :attr:`keys` to the input data. tuple -> dict.
 
@@ -335,7 +331,7 @@ class DataSpread(BaseTool):
         return self._spread_data(*args)
 
 
-class DataMergeDict(BaseTool):
+class DataMergeDict(Tool):
     """
     Merge multiple dictionaries. {**a, **b, ...}.
     """
@@ -344,7 +340,7 @@ class DataMergeDict(BaseTool):
         super(DataMergeDict, self).__init__(name=name, **kwargs)
 
     @staticmethod
-    def _merge_data(args: tuple, **kwargs):
+    def _merge_data(args: tuple, **_):
         result = dict()
         for arg in args:
             result.update(arg)
@@ -354,7 +350,7 @@ class DataMergeDict(BaseTool):
         return self._merge_data(*args)
 
 
-class DataMergeList(BaseTool):
+class DataMergeList(Tool):
     """
     Merge multiple lists. [**a, **b, ...].
     """
@@ -363,7 +359,7 @@ class DataMergeList(BaseTool):
         super(DataMergeList, self).__init__(name=name, **kwargs)
 
     @staticmethod
-    def _merge_data(args: tuple, **kwargs):
+    def _merge_data(args: tuple, **_):
         result = list()
         for arg in args:
             result.append(arg)
@@ -378,18 +374,11 @@ class InputUnpack(Variable):
     Use tool on the unpacked ``tuple`` of ``args``. tool(*inp).
 
     Args:
-        tool (BaseTool): tool to use.
+        tool (Tool): tool to use.
     """
 
-    def __init__(self, tool: 'BaseTool', name: str = 'DataUnpack', **kwargs):
+    def __init__(self, tool: 'Tool', name: str = 'DataUnpack', **kwargs):
         super(InputUnpack, self).__init__(tool=tool, name=name, **kwargs)
 
     def use(self, inp: tuple, **kwargs) -> Any:
         return self.tool(*inp, **kwargs)
-
-
-class Debug(BaseTool):
-    # Debug tool
-    def use(self, *args, **kwargs):
-        result = tuple(*args)
-        return result

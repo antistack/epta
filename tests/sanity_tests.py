@@ -11,7 +11,7 @@ def mapper_test():
             return self.tool(self.config, 30)
 
     class ConfigTool2(ConfigTool):
-        def __init__(self, tool: 'BaseTool' = None, **kwargs):
+        def __init__(self, tool: 'Tool' = None, **kwargs):
             super(ConfigTool2, self).__init__(tool=tool, **kwargs)
 
         def update(self, *args, **kwargs):  # trigger update
@@ -42,7 +42,7 @@ def hooker_test():
     import epta.tools.hookers.image_hookers as eti
     import numpy as np
 
-    class CustomImageHooker(eti.BaseImageHooker, ec.PositionDependent):
+    class CustomImageHooker(eti.ImageHooker, ec.PositionDependent):
         def hook_image(self, *args, **kwargs):
             return np.zeros((300, 300, 3), dtype=np.uint8)
 
@@ -110,7 +110,7 @@ def render_test():
     import epta.tools.renderers as er
     import numpy as np
 
-    class CustomRenderer(er.BaseRenderer):
+    class CustomRenderer(er.Renderer):
         def render(self, image: 'np.ndarray', *args, **kwargs):
             if image is not None:
                 print(image.shape)

@@ -1,6 +1,7 @@
-from .base_renderer import BaseRenderer
+from .renderer import Renderer
 
-class SimpleRenderer(BaseRenderer):
+
+class SimpleRenderer(Renderer):
     @staticmethod
     def render(*args, **kwargs):
         for arg in args:

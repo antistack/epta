@@ -1,10 +1,10 @@
 import cv2 as cv
 
-from .base_image_hooker import BaseImageHooker
+from .image_hooker import ImageHooker
 
 
-class ImreadHooker(BaseImageHooker):
-    def __init__(self, name: str = 'imread_hooker', **kwargs):
+class ImreadHooker(ImageHooker):
+    def __init__(self, name: str = 'Imread_hooker', **kwargs):
         super(ImreadHooker, self).__init__(name=name, **kwargs)
 
     @staticmethod

@@ -1,10 +1,10 @@
 import keyboard
 
-from epta.core import BaseTool, ConfigDependent
+from epta.core import Tool, ConfigDependent
 
 
-class KeyboardHooker(BaseTool, ConfigDependent):
-    def __init__(self, config: 'Config' = None, name: str = 'keyboard_hooker', **kwargs):
+class KeyboardHooker(Tool, ConfigDependent):
+    def __init__(self, config: 'Config' = None, name: str = 'Keyboard_hooker', **kwargs):
         super(KeyboardHooker, self).__init__(config=config, name=name, **kwargs)
 
         self.working_state = False

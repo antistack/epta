@@ -5,10 +5,10 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="epta",
-    version="0.0.1",
+    version="0.0.2",
     author="antistack",
     author_email="",
-    description="Utils for CV bots creation",
+    description="Tools for pipelines creation",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/antistack/epta",

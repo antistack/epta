@@ -3,7 +3,7 @@ from typing import Any, Dict, Iterator, ItemsView, Iterable, Union, List
 from .meta import UpdateDependent
 
 
-class BaseTool(UpdateDependent):
+class Tool(UpdateDependent):
     """
     Base class for tool instance.
 
@@ -11,7 +11,7 @@ class BaseTool(UpdateDependent):
         name (str): Tool name.
     """
 
-    def __init__(self, name: str = 'BaseTool', **kwargs):
+    def __init__(self, name: str = 'Tool', **kwargs):
         super().__init__(**kwargs)
         self.name = name
 
@@ -25,7 +25,7 @@ class BaseTool(UpdateDependent):
         return self.use(*args, **kwargs)
 
 
-class ToolDict(BaseTool):
+class ToolDict(Tool):
     """
     Holds tools in a dictionary.
 
@@ -34,7 +34,7 @@ class ToolDict(BaseTool):
             If list is passed - keys are tool.name.
     """
 
-    def __init__(self, tools: Union[Dict[str, BaseTool], List[BaseTool]] = None, name='ToolDict', **kwargs) -> None:
+    def __init__(self, tools: Union[Dict[str, Tool], List[Tool]] = None, name='ToolDict', **kwargs) -> None:
         super(ToolDict, self).__init__(name=name, **kwargs)
         if tools is None:
             tools = dict()
@@ -42,10 +42,10 @@ class ToolDict(BaseTool):
             tools = {tool.name: tool for tool in tools}
         self._tools = tools
 
-    def __getitem__(self, key: str) -> BaseTool:
+    def __getitem__(self, key: str) -> Tool:
         return self._tools[key]
 
-    def __setitem__(self, key: str, tool: BaseTool) -> None:
+    def __setitem__(self, key: str, tool: Tool) -> None:
         self.add_tool(key, tool)
 
     def __delitem__(self, key: str) -> None:
@@ -63,7 +63,7 @@ class ToolDict(BaseTool):
     def clear(self) -> None:
         self._tools.clear()
 
-    def pop(self, key: str) -> BaseTool:
+    def pop(self, key: str) -> Tool:
         v = self[key]
         del self[key]
         return v
@@ -71,13 +71,13 @@ class ToolDict(BaseTool):
     def keys(self) -> Iterable[str]:
         return self._tools.keys()
 
-    def items(self) -> ItemsView[str, BaseTool]:
+    def items(self) -> ItemsView[str, Tool]:
         return self._tools.items()
 
-    def values(self) -> Iterable[BaseTool]:
+    def values(self) -> Iterable[Tool]:
         return self._tools.values()
 
-    def add_tool(self, key: str, tool: BaseTool):
+    def add_tool(self, key: str, tool: Tool):
         self._tools[key] = tool
 
     def get(self, key: str, default_value=None):
@@ -85,7 +85,7 @@ class ToolDict(BaseTool):
 
     def update(self, *args, **kwargs):
         for tool in self._tools.values():
-            if isinstance(tool, BaseTool):
+            if isinstance(tool, Tool):
                 tool.update(*args, **kwargs)
 
     def use(self, *args, **kwargs) -> dict:

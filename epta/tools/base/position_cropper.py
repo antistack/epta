@@ -2,6 +2,7 @@ from epta.core import PositionDependent
 
 from .cropper import Cropper
 
+
 class PositionCropper(Cropper, PositionDependent):
     def __init__(self, name: str = 'PositionCropper', **kwargs):
         super(Cropper, self).__init__(name=name, **kwargs)

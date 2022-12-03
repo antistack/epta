@@ -1,1 +1,1 @@
-from .base_recogniser import BaseRecogniser
+from .recogniser import Recogniser

@@ -134,3 +134,4 @@ lodc.egg-info
 tests/temp
 demo/temp
 epta/core/_tool.py
+*.DS_Store

@@ -21,6 +21,7 @@ class ToolWrapper(ToolDict):
     def update(self, *args, **kwargs):
         self.tool.update(*args, **kwargs)
 
+
 class PositionMapperWrapper(ToolWrapper):
     """
     Triggers ``use`` on ``update``.

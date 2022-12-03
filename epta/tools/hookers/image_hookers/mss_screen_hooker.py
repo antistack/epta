@@ -4,11 +4,11 @@ import cv2 as cv
 
 from epta.core import PositionDependent
 
-from .base_image_hooker import BaseImageHooker
+from .image_hooker import ImageHooker
 
 
-class MssScreenHooker(BaseImageHooker, PositionDependent):
-    def __init__(self, name: str = 'mss_hooker', **kwargs):
+class MssScreenHooker(ImageHooker, PositionDependent):
+    def __init__(self, name: str = 'Mss_hooker', **kwargs):
         super(MssScreenHooker, self).__init__(name=name, **kwargs)
 
     def update(self, *args, **kwargs):
