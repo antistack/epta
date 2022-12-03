@@ -1,5 +1,5 @@
-# EPTA: Easy Pipeline Tools for Automatisation
-### Build your custom CV tool for any purpose.
+# EPTA: Easy Pipeline Tools for Automation
+### Build your custom pipeline for any purpose.
 ##### This project includes basic blocks and logic for pipeline building.
  
 ### Examples
