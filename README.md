@@ -3,7 +3,7 @@
 ##### This project includes basic blocks and logic for pipeline building.
  
 ### Examples
-- Currently, you can find examples in `test/sanity_tests.py` 
+- Currently, you can find examples in [Example](tests/sanity_tests.py) 
 
 #### Demo projects
 - [Valorant helper](https://github.com/codepause/vahper)
