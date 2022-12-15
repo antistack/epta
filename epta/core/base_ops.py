@@ -86,9 +86,15 @@ class SoftAtomic(Atomic):
         super(SoftAtomic, self).__init__(*args, name=name, **kwargs)
         self._default_value = default_value
         if callable(default_value):
-            self._default_value_getter = lambda: default_value()
+            self._default_value_getter = self._spawn_default_value
         else:
-            self._default_value_getter = lambda: default_value
+            self._default_value_getter = self._get_default_value
+
+    def _get_default_value(self):
+        return self._default_value
+
+    def _spawn_default_value(self):
+        return self._default_value()
 
     def use(self, data: dict, default_value=None, **kwargs):
         default_value = default_value or self._default_value_getter()
