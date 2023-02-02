@@ -137,8 +137,42 @@ def render_test():
     return None
 
 
+def tool_dict_test():
+    from epta.core import ToolDict, Tool
+
+    a = ToolDict(
+        {
+            '1': lambda x, **_: x,
+            '2': lambda x, **_: x,
+            '3': lambda x, **_: x,
+        },
+        use_behaviour='dict'
+    )
+    b = ToolDict(
+        {
+            '1': lambda x, **_: x,
+            '2': lambda x, **_: x,
+            '3': lambda x, **_: x,
+        },
+        use_behaviour='sequential'
+    )
+    c = ToolDict(
+        {
+            '1': lambda x, **_: x,
+            '2': lambda x, **_: x,
+            '3': lambda x, **_: x,
+        },
+        use_behaviour='concatenate'
+    )
+
+    assert a(0) == {'1': 0, '2': 0, '3': 0}
+    assert b(0) == 0
+    assert c(0) == [0, 0, 0]
+
+
 if __name__ == '__main__':
     mapper_test()
     hooker_test()
     cropper_test()
     render_test()
+    tool_dict_test()

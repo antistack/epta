@@ -117,9 +117,14 @@ class Sequential(Tool):
 
         self.tools = tools
 
-    def use(self, inp: Any = None, **kwargs) -> Any:
+    def use(self, *args, **kwargs) -> Any:
         # kwargs are passed via tool name or are common for all tools.
-        for tool in self.tools:
+        if not self.tools:
+            return None
+
+        tool = self.tools[0]
+        inp = tool(*args, **kwargs.get(tool.name, kwargs))
+        for tool in self.tools[1:]:
             inp = tool(inp, **kwargs.get(tool.name, kwargs))
         return inp
 
@@ -388,3 +393,29 @@ class InputUnpack(Variable):
 
     def use(self, inp: tuple, **kwargs) -> Any:
         return self.tool(*inp, **kwargs)
+
+
+class PassArgs(Tool):
+    """
+    Used in compose function to pass args from inputs.
+    """
+
+    def __init__(self, tool: 'Tool', name: str = 'PassArgs', **kwargs):
+        super(PassArgs, self).__init__(tool=tool, name=name, **kwargs)
+
+    @staticmethod
+    def use(*args, **_) -> tuple:
+        return args
+
+
+class PassKwargs(Tool):
+    """
+    Used in compose function to pass kwargs from inputs.
+    """
+
+    def __init__(self, tool: 'Tool', name: str = 'PassKwargs', **kwargs):
+        super(PassKwargs, self).__init__(tool=tool, name=name, **kwargs)
+
+    @staticmethod
+    def use(*_, **kwargs) -> dict:
+        return kwargs
