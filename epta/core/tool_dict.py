@@ -29,11 +29,11 @@ class ToolDict(Tool):
 
         # TODO: metaclass?
         __use_mapping = {
-            'dict': self.__dict_use,
-            'sequential': self.__sequential_use,
-            'concatenate': self.__concatenate_use,
+            'dict': self._dict_use,
+            'sequential': self._sequential_use,
+            'concatenate': self._concatenate_use,
         }
-        self.use = __use_mapping.get(use_behaviour, self.__dict_use)
+        self.use = __use_mapping.get(use_behaviour, self._dict_use)
 
     def __getitem__(self, key: str) -> Tool:
         return self._tools[key]
@@ -85,7 +85,7 @@ class ToolDict(Tool):
             if isinstance(tool, Tool):
                 tool.update(*args, **kwargs)
 
-    def __sequential_use(self, *args, **kwargs) -> Any:
+    def _sequential_use(self, *args, **kwargs) -> Any:
         # kwargs are passed via key or are common for all tools.
 
         tools = list(self.items())
@@ -99,13 +99,13 @@ class ToolDict(Tool):
             inp = tool(inp, **kwargs.get(key, kwargs))
         return inp
 
-    def __concatenate_use(self, *args, **kwargs) -> List:
+    def _concatenate_use(self, *args, **kwargs) -> List:
         result = list()
         for tool in self.tools:
             result.append(tool(*args, **kwargs))
         return result
 
-    def __dict_use(self, *args, **kwargs) -> dict:
+    def _dict_use(self, *args, **kwargs) -> dict:
         data = dict()
         for key, tool in self.items():
             data[key] = tool(*args, **kwargs)
