@@ -395,27 +395,39 @@ class InputUnpack(Variable):
         return self.tool(*inp, **kwargs)
 
 
-class PassArgs(Tool):
+class AddArgs(Variable):
     """
-    Used in compose function to pass args from inputs.
-    """
+    Add args on a runtime.
 
-    def __init__(self, tool: 'Tool', name: str = 'PassArgs', **kwargs):
-        super(PassArgs, self).__init__(tool=tool, name=name, **kwargs)
-
-    @staticmethod
-    def use(*args, **_) -> tuple:
-        return args
-
-
-class PassKwargs(Tool):
-    """
-    Used in compose function to pass kwargs from inputs.
+        Args:
+        tool (Tool): Tool to wrap.
+        args (tuple): args to add after __call__ args.
     """
 
-    def __init__(self, tool: 'Tool', name: str = 'PassKwargs', **kwargs):
-        super(PassKwargs, self).__init__(tool=tool, name=name, **kwargs)
+    def __init__(self, tool: 'Tool', args: tuple, name: str = 'AddArgs', **kwargs):
+        super(AddArgs, self).__init__(tool=tool, name=name, **kwargs)
+        self.args = args
 
-    @staticmethod
-    def use(*_, **kwargs) -> dict:
-        return kwargs
+    def use(self, *args, **kwargs) -> Any:
+        return self.tool(*(*args, *self.args), **kwargs)
+
+
+class AddKwargs(Variable):
+    """
+    Add kwargs on a runtime. overwrites passed kwargs from __call__
+
+    Args:
+        tool (Tool): Tool to wrap.
+
+    Keyword Args:
+        tool_kwargs (dict): kwargs to add to the tool call.
+    """
+
+    def __init__(self, tool: 'Tool', tool_kwargs: dict = None, name: str = 'AddKwargs', **kwargs):
+        super(AddKwargs, self).__init__(tool=tool, name=name, **kwargs)
+        if tool_kwargs is None:
+            tool_kwargs = dict()
+        self.tool_kwargs = tool_kwargs
+
+    def use(self, *args, **kwargs) -> Any:
+        return self.tool(*args, **{**kwargs, **self.tool_kwargs})
