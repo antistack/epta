@@ -23,6 +23,18 @@ class Lambda(Tool):
         return self._fnc(*args, **kwargs) if self._allow_kwargs else self._fnc(*args)
 
 
+class Identity(Tool):
+    """
+    A tool that returns its first argument, unchanged. A no-op.
+    """
+
+    def __init__(self, name: str = 'Identity', **kwargs):
+        super(Identity, self).__init__(name=name, **kwargs)
+
+    def use(self, *args, **kwargs) -> Any:
+        return args[0] if args else None
+
+
 class Wrapper(Tool):
     """
     Wrapper to pass tools as ``args`` or ``kwargs`` in :class:`~epta.core.base_ops.Compose`.
@@ -136,6 +148,10 @@ class Sequential(Tool):
         if isinstance(tool, Tool):
             self.tools.append(tool)
 
+    def __repr__(self) -> str:
+        tool_reprs = ", ".join(repr(t) for t in self.tools)
+        return f"{self.__class__.__name__}(name='{self.name}', tools=[{tool_reprs}])"
+
 
 class Product(Sequential):
     def __init__(self, tools: List['Tool'] = None, name: str = 'Product', **kwargs):
@@ -223,8 +239,14 @@ class Compose(Tool):
 
     def use(self, *args, **kwargs) -> Any:
         func_args = self._use_args(*args, **kwargs)
-        func_kwargs = self._use_kwargs()
+        func_kwargs = self._use_kwargs(*args, **kwargs)
         return self._fnc(*func_args, **func_kwargs)
+
+    def __repr__(self) -> str:
+        return (f"{self.__class__.__name__}(name='{self.name}', "
+                f"fnc={repr(self._fnc)}, "
+                f"func_args={self.func_args}, "
+                f"func_kwargs={self.func_kwargs})")
 
 
 class Parallel(Variable):
